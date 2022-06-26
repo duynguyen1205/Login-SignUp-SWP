@@ -5,19 +5,19 @@ function Validator(options) {
     function validate(inputElement, rule) {
         var errorMessage;
         var errorElement = inputElement.parentElement.querySelector(options.errorSelector);
-        
+
         //lấy ra các rule của selector 
         var rules = selectorRules[rule.selector];
 
         //lập ra từng rule và kiểm tra 
         //nếu có lỗi thì dừng việc kiểm tra 
-        for(var i = 0; i < rules.length; ++i) {
+        for (var i = 0; i < rules.length; ++i) {
             errorMessage = rules[i](inputElement.value);
-            if(errorMessage) {
+            if (errorMessage) {
                 break;
             }
         }
-        if(errorMessage) {
+        if (errorMessage) {
             errorElement.innerText = errorMessage;
             inputElement.parentElement.classList.add('invalid');
         }
@@ -27,94 +27,94 @@ function Validator(options) {
         }
 
         return !errorMessage; // thành true false 
-       
+
     }
     // lấy element của form cần để validate 
     var formElement = document.querySelector(options.form);
-    if(formElement) {
+    if (formElement) {
         //khi submit form
-        formElement.onsubmit = function(e) {
+        formElement.onsubmit = function (e) {
             e.preventDefault(); // không cho submit form
-            var isFormValid = true 
+            var isFormValid = true
             // lập qua các rule và check tất cả 
             options.rules.forEach(function (rule) {
                 var inputElement = formElement.querySelector(rule.selector);
                 var isValid = validate(inputElement, rule);
-                if(!isValid) {
+                if (!isValid) {
                     isFormValid = false;
                 }
             });
 
             // nếu mọi thứ ok thì cho submit
-            if(isFormValid) {
+            if (isFormValid) {
                 formElement.submit();
-            } 
+            }
         }
     }
-    
+
     //xử lý lập qua mỗi rule
-    if(formElement){
-        options.rules.forEach(function(rule) {
+    if (formElement) {
+        options.rules.forEach(function (rule) {
 
             // lưu lại các rules cho mỗi input
-            if(Array.isArray(selectorRules[rule.selector])) {
+            if (Array.isArray(selectorRules[rule.selector])) {
                 selectorRules[rule.selector].push(rule.test);
             } else {
-                 selectorRules[rule.selector] = [rule.test];
+                selectorRules[rule.selector] = [rule.test];
             }
-           
+
 
             var inputElement = formElement.querySelector(rule.selector);
             //xử lý trường hợp nhập xong ô (blur)
-            if(inputElement) {
+            if (inputElement) {
                 inputElement.onblur = function () {
-                   validate(inputElement, rule);
+                    validate(inputElement, rule);
                 }
             }
 
             //xử lý mỗi khi người dùng nhập vào input
-            inputElement.oninput = function() {
+            inputElement.oninput = function () {
                 var errorElement = inputElement.parentElement.querySelector('.form-message');
                 errorElement.innerText = '';
                 inputElement.parentElement.classList.remove('invalid');
             }
-        }); 
+        });
     }
 
 }
 // định nghĩa rules cho form
-Validator.isRequired = function(selector, message) {
+Validator.isRequired = function (selector, message) {
     return {
         selector: selector,
-        test: function(value) {
+        test: function (value) {
             return value.trim() ? undefined : message || 'Vui lòng nhập vào ô này';
         }
     };
 }
 
-Validator.isEmail = function(selector, message) {
+Validator.isEmail = function (selector, message) {
     return {
         selector: selector,
-        test: function(value) {
+        test: function (value) {
             var regax = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
             return regax.test(value) ? undefined : message;
         }
     };
 }
 
-Validator.minLength = function(selector, min, message) {
+Validator.minLength = function (selector, min, message) {
     return {
         selector: selector,
-        test: function(value) {
-            return value.length >= min ? undefined : message ;
+        test: function (value) {
+            return value.length >= min ? undefined : message;
         }
     };
 }
 
-Validator.isConfirmed = function(selector, getConfirmValue, message) {
+Validator.isConfirmed = function (selector, getConfirmValue, message) {
     return {
         selector: selector,
-        test: function(value) {
+        test: function (value) {
             return value === getConfirmValue() ? undefined : message;
         }
     };
